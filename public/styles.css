@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css?family=Numans');
 
 html, body {
-  background-image: url('http://getwallpapers.com/wallpaper/full/d/f/7/479379.jpg');
+  background-image: url('http://getwallpapers.com/wallpaper/full/8/0/f/599296.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   height: 100%;
@@ -21,8 +21,7 @@ html, body {
 
 .card {
   height: 455px;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin-top: 150px;
   width: 400px;
   background-color: rgba(0, 0, 0, 0.5) !important;
 }
