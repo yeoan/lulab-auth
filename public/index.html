@@ -18,6 +18,10 @@
 
 	<!--Custom styles-->
 	<link rel="stylesheet" type="text/css" href="./styles.css">
+	<script src="https://www.gstatic.com/firebasejs/5.5.8/firebase.js"></script>
+	<script src="./init.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/validate.js/0.12.0/validate.min.js"></script>
+	<script src="./index"></script>
 </head>
 <body>
 	<nav id="navbar" class="navbar navbar-expand-lg">
@@ -52,24 +56,24 @@
 				</div>
 			</div>
 			<div class="card-body">
-				<form>
+				<form action="javascript:handleSignUp();">
 					<div class="input-group form-group">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fas fa-envelope"></i></span>
 						</div>
-						<input id="Enter_the_Form_Element_for_Book_ID_field" type="text" class="form-control" placeholder="電子郵件">
+						<input id="Enter_the_Form_Element_for_Email_field" type="email" class="form-control" placeholder="電子郵件">
 					</div>
 					<div class="input-group form-group">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fas fa-key"></i></span>
 						</div>
-						<input id="Enter_the_Form_Element_for_Password_field" type="text" class="form-control" placeholder="密碼">
+						<input id="Enter_the_Form_Element_for_Password_field" type="password" class="form-control" placeholder="密碼">
 					</div>
 					<div class="input-group form-group">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fas fa-key"></i></span>
 						</div>
-						<input id="Enter_the_Form_Element_for_Password_check_field" type="text" class="form-control" placeholder="密碼">
+						<input id="Enter_the_Form_Element_for_Password_check_field" type="password" class="form-control" placeholder="密碼">
 					</div>
 					<div class="input-group form-group">
 						<div class="input-group-prepend">
