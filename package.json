@@ -9,10 +9,12 @@
   "author": "yao",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "mariadb": "^2.0.0-alpha",
     "path": "^0.12.7",
+    "pg": "^7.7.1",
     "validator": "^10.9.0"
   }
 }
