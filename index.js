@@ -1,27 +1,53 @@
-var express = require("express")
-var app = new express()
-var bodyParser = require('body-parser')
-var cookieParser = require('cookie-parser')
-var path = require('path')
-var pg = require('pg')
-var config = require('./config')
-var session = require('express-session')
+const express = require("express")
+const app = new express()
+const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const path = require('path')
+const pg = require('pg')
+const config = require('./config')
+const session = require('express-session')
 const bcrypt = require('bcrypt')
-var passport = require('passport')
-var Strategy = require('passport-local').Strategy;
-var pgSession = require('connect-pg-simple')(session);
-var db = require('./db');
+const passport = require('passport')
+const Strategy = require('passport-local').Strategy;
+const pgSession = require('connect-pg-simple')(session);
+const db = require('./db');
+
 
 const saltRounds = 10;
 
 passport.use(new Strategy(
-  function(username, password, cb) {
-    db.users.findByUsername(username, function(err, user) {
-      if (err) { return cb(err); }
-      if (!user) { return cb(null, false); }
-      if (user.password != password) { return cb(null, false); }
-      return cb(null, user);
-    });
+  function(username, password, done) {
+    // db.users.findByUsername(username, function(err, user) {
+    //   if (err) { return cb(err); }
+    //   if (!user) { return cb(null, false); }
+    //   if (user.password != password) { return cb(null, false); }
+    //   return cb(null, user);
+    // });
+    let client = new pg.Client(config.db);
+    client.connect(err => {
+          if (err) {
+            console.log(err)
+          }
+          else {
+            const query = {
+              name: 'fetch-user',
+              text: 'SELECT * FROM users WHERE email = $1',
+              values: [username]
+            }
+              client.query(query)
+                  .then(resp => {
+                    bcrypt.compare(password, resp.rows[0].password, function(err, res) {
+                      if(res){
+                        return done(null,resp.rows[0])
+                      }
+                    });
+                    client.end();
+                  })
+                  .catch(err => {
+                      console.log(err);
+                  });
+          }
+      });
   }));
 
 
@@ -29,11 +55,32 @@ passport.use(new Strategy(
   cb(null, user.id);
 });
 
-passport.deserializeUser(function(id, cb) {
-  db.users.findById(id, function (err, user) {
-    if (err) { return cb(err); }
-    cb(null, user);
-  });
+passport.deserializeUser(function(id, done) {
+  // db.users.findById(id, function (err, user) {
+  //   if (err) { return cb(err); }
+  //   cb(null, user);
+  // });
+  let client = new pg.Client(config.db);
+  client.connect(err => {
+        if (err) {
+          console.log(err)
+        }
+        else {
+          const query = {
+            name: 'fetch-user',
+            text: 'SELECT * FROM users WHERE id = $1',
+            values: [id]
+          }
+            client.query(query)
+                .then(resp => {
+                  return done(null, resp.rows[0])
+                  client.end();
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+    });
 });
 
 app.use(express.static(__dirname + "/public"));
@@ -65,25 +112,24 @@ app.get("/register", function(req, resp, next) {
     resp.redirect("./register.html");
 });
 
-//'INSERT INTO "public"."users"("username", "email", "password") VALUES('+'\''+uname+'\',\''+email+'\',\''+pass+'\');'
 app.post("/register", function(req, resp, next) {
-  var client = new pg.Client(config.db);
-
   bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
   // Store hash in your password DB.
+  let client = new pg.Client(config.db);
   client.connect(err => {
         if (err) {
-          resp.send({result:'conn failure'})
+          res.send({result:'conn failure'})
         }
         else {
             client.query('INSERT INTO "public"."users"("username", "email", "password") VALUES('+'\''+req.body.username+'\',\''+req.body.email+'\',\''+hash+'\');')
                 .then(res => {
                   console.log(res)
                   resp.send({result:'regis success'})
+                  client.end();
                 })
                 .catch(err => {
                     console.log(err);
-                    resp.send({result:'regis failure'})
+                    res.send({result:'regis failure'})
                 });
         }
     });
@@ -91,28 +137,26 @@ app.post("/register", function(req, resp, next) {
 });
 
 app.get("/login", function(req, resp, next) {
+  resp.setHeader('Content-Type', 'application/json');
   if(req.user){
-    resp.redirect('/main.html')
+    resp.json({result: 'have logined'})
   }else{
     resp.redirect('/login.html')
   }
 });
 
 app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }),function(req, resp, next) {
-    resp.redirect('/main.html')
+  console.log('login post')
+    resp.redirect('http://yao.walsin.com')
 });
 
-function ensureAuthenticated(req, res, next){
+function ensureAuthenticated(req, resp, next){
   if(req.user){
     return next();
   } else {
-    res.redirect('/login.html')
+    resp.redirect('/login.html')
   }
 }
-
-app.get("/main",ensureAuthenticated,function(req, resp, next) {
-    resp.redirect('/main'+req.user.username)
-});
 
 
 //Start Server
