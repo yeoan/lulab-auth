@@ -11,6 +11,11 @@ const passport = require('passport')
 const Strategy = require('passport-local').Strategy;
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./db');
+const mongoose = require('mongoose');
+
+var Schema = mongoose.Schema;
+
+var UserModel = mongoose.model('Users', new Schema({ email: String, name: String, birthday: String, address: String , image: String}));
 
 
 const saltRounds = 10;
@@ -118,18 +123,35 @@ app.post("/register", function(req, resp, next) {
   let client = new pg.Client(config.db);
   client.connect(err => {
         if (err) {
-          res.send({result:'conn failure'})
+          resp.send({result:'conn failure'})
         }
         else {
             client.query('INSERT INTO "public"."users"("username", "email", "password") VALUES('+'\''+req.body.username+'\',\''+req.body.email+'\',\''+hash+'\');')
                 .then(res => {
                   console.log(res)
-                  resp.send({result:'regis success'})
+
+//save to mongo
+                  mongoose.connect('mongodb://localhost:27017/final');
+                    let userData = new UserModel({ email: req.body.email, name: req.body.username, birthday: '', address: '', image: '' });
+                    userData.save(function (err) {
+                      if (err){
+                      console.log(err)
+                      resp.send({result:'store information falurely'})
+                    mongoose.disconnect();
+                  }
+                      else{
+                        resp.send({result:'regis success'})
+                        mongoose.disconnect();
+                      }
+                      // saved!
+                    });
+//save to mongo
+
                   client.end();
                 })
                 .catch(err => {
                     console.log(err);
-                    res.send({result:'regis failure'})
+                    resp.send({result:'regis failure'})
                 });
         }
     });

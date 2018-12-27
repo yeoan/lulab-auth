@@ -46,7 +46,7 @@ function signUp(uname,email,pass,pass2){
   .then(function (response) {
     console.log(response);
     if(response.data.result=='regis success'){
-      window.location.href = "http://127.0.0.1:3000/login"
+      window.location.href = "http://yao.walsin.com"
       alert('register successfully')
     }
     else if(response.data.result=='regis failure'){
