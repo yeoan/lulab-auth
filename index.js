@@ -12,11 +12,16 @@ const Strategy = require('passport-local').Strategy;
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./db');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 var Schema = mongoose.Schema;
 
 var UserModel = mongoose.model('Users', new Schema({ email: String, name: String, birthday: String, address: String , image: String}));
 
+app.use(cors({
+  credentials: true,
+  origin: 'http://yao.walsin.com'
+}));
 
 const saltRounds = 10;
 
@@ -90,18 +95,11 @@ passport.deserializeUser(function(id, done) {
 
 app.use(express.static(__dirname + "/public"));
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*")
-  res.header("Access-Control-Allow-Headers", "Authorization, X-Requested-With, Content-Type, X-HTTP-Method");
-  res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-  res.header("Content-Type", "application/json")
-  next();
-});
-
 app.use(require('cookie-parser')());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
+  // domain: '.auth.com',
   store: new pgSession({
     pg : pg,                                  // Use global pg-module
     conString : 'http://127.0.0.1:5432', // Connect using something else than default DATABASE_URL env variable
@@ -160,25 +158,36 @@ app.post("/register", function(req, resp, next) {
 
 app.get("/login", function(req, resp, next) {
   resp.setHeader('Content-Type', 'application/json');
+  console.log('123')
   if(req.user){
     resp.json({result: 'have logined'})
   }else{
-    resp.redirect('/login.html')
+    resp.redirect('http://yao.auth.com:3000/login.html')
   }
 });
 
 app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }),function(req, resp, next) {
   console.log('login post')
-    resp.redirect('http://yao.walsin.com')
+    resp.redirect('http://yao.walsin.com/')
 });
 
 function ensureAuthenticated(req, resp, next){
   if(req.user){
     return next();
   } else {
-    resp.redirect('/login.html')
+    resp.redirect('http://yao.auth.com:3000/login.html')
   }
 }
+
+app.get('/usercheck', function (req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  if(req.user){
+    res.json({id: req.session.passport.user,email: req.user.email});
+  }else{
+    res.json({result: 'error'})
+  }
+
+})
 
 
 //Start Server
