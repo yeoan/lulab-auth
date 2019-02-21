@@ -4,7 +4,7 @@
 function handleLogin(){
   let email = document.getElementById('Login_Element_for_Email_field').value;
   let password = document.getElementById('Login_Element_for_Password_field').value;
-  axios.post('http://127.0.0.1:3000/login', {
+  axios.post('http://yao.walsin.com:3000/login', {
     email: email,
     password: password,
   })
@@ -33,11 +33,7 @@ function handleSignUp(){
 }
 
 function signUp(uname,email,pass,pass2){
-  console.log(uname);
-  console.log(email);
-  console.log(pass);
-  console.log(pass2);
-  axios.post('http://127.0.0.1:3000/register', {
+  axios.post('http://yao.auth.com:3000/register', {
     username: uname,
     email: email,
     password: pass,

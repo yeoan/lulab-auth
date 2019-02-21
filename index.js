@@ -106,7 +106,8 @@ app.use(session({
     tableName : 'session'               // Use another table-name than the default "session" one
   }),
   secret: 'keyboard cat',
-  resave: false, saveUninitialized: false
+  resave: false, saveUninitialized: false,
+  cookie: { domain: '.walsin.com', maxAge: 1000*60*60*24 }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -162,7 +163,7 @@ app.get("/login", function(req, resp, next) {
   if(req.user){
     resp.json({result: 'have logined'})
   }else{
-    resp.redirect('http://yao.auth.com:3000/login.html')
+    resp.redirect('http://auth.walsin.com:3000/login.html')
   }
 });
 
@@ -175,7 +176,7 @@ function ensureAuthenticated(req, resp, next){
   if(req.user){
     return next();
   } else {
-    resp.redirect('http://yao.auth.com:3000/login.html')
+    resp.redirect('http://auth.walsin.com:3000/login.html')
   }
 }
 
