@@ -27,12 +27,6 @@ const saltRounds = 10;
 
 passport.use(new Strategy(
   function(username, password, done) {
-    // db.users.findByUsername(username, function(err, user) {
-    //   if (err) { return cb(err); }
-    //   if (!user) { return cb(null, false); }
-    //   if (user.password != password) { return cb(null, false); }
-    //   return cb(null, user);
-    // });
     let client = new pg.Client(config.db);
     client.connect(err => {
           if (err) {
@@ -128,24 +122,6 @@ app.post("/register", function(req, resp, next) {
             client.query('INSERT INTO "public"."users"("username", "email", "password") VALUES('+'\''+req.body.username+'\',\''+req.body.email+'\',\''+hash+'\');')
                 .then(res => {
                   console.log(res)
-
-//save to mongo
-                  mongoose.connect('mongodb://localhost:27017/final');
-                    let userData = new UserModel({ email: req.body.email, name: req.body.username, birthday: '', address: '', image: '' });
-                    userData.save(function (err) {
-                      if (err){
-                      console.log(err)
-                      resp.send({result:'store information falurely'})
-                    mongoose.disconnect();
-                  }
-                      else{
-                        resp.send({result:'regis success'})
-                        mongoose.disconnect();
-                      }
-                      // saved!
-                    });
-//save to mongo
-
                   client.end();
                 })
                 .catch(err => {
@@ -159,9 +135,10 @@ app.post("/register", function(req, resp, next) {
 
 app.get("/login", function(req, resp, next) {
   resp.setHeader('Content-Type', 'application/json');
-  console.log('123')
+  console.log(req)
   if(req.user){
-    resp.json({result: 'have logined'})
+    //resp.json({result: 'have logined'})
+    resp.redirect('http://yao.walsin.com:8080')
   }else{
     resp.redirect('http://auth.walsin.com:3000/login.html')
   }
@@ -169,27 +146,14 @@ app.get("/login", function(req, resp, next) {
 
 app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }),function(req, resp, next) {
   console.log('login post')
-    resp.redirect('http://yao.walsin.com/')
+    resp.redirect('http://yao.walsin.com:8080/')
 });
 
-function ensureAuthenticated(req, resp, next){
-  if(req.user){
-    return next();
-  } else {
-    resp.redirect('http://auth.walsin.com:3000/login.html')
-  }
-}
 
-app.get('/usercheck', function (req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  if(req.user){
-    res.json({id: req.session.passport.user,email: req.user.email});
-  }else{
-    res.json({result: 'error'})
-  }
-
-})
-
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('http://auth.walsin.com:3000/login.html');
+});
 
 //Start Server
 app.listen(3000, function(err) {
